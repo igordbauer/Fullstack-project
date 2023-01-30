@@ -1,5 +1,5 @@
 import React, { useCallback, useReducer } from "react";
-import "./NewPlace.css";
+import "./PlaceForm.css";
 import Button from "../../shared/components/FormComponents/Button";
 import {
   VALIDATOR_REQUIRE,
@@ -39,6 +39,10 @@ const NewPlace = () => {
         isValid: false,
       },
       description: {
+        value: "",
+        isValid: false,
+      },
+      address: {
         value: "",
         isValid: false,
       },
