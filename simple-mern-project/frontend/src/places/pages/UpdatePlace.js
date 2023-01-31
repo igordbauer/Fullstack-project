@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Input from "../../shared/components/FormComponents/Input";
-import "./PlaceForm.css";
 import Button from "../../shared/components/FormComponents/Button";
 import {
   VALIDATOR_REQUIRE,
   VALIDATOR_MINLENGTH,
 } from "../../shared/util/validators";
 import { useForm } from "../../shared/hooks/form-hook";
+import "./PlaceForm.css";
 
 const PLACES = [
   {
@@ -58,19 +58,21 @@ const UpdatePlace = () => {
   const identifiedPlace = PLACES.filter((place) => place.id === placeId)[0];
 
   useEffect(() => {
-    setFormData(
-      {
-        title: {
-          value: identifiedPlace.title,
-          isValid: true,
+    if (identifiedPlace) {
+      setFormData(
+        {
+          title: {
+            value: identifiedPlace.title,
+            isValid: true,
+          },
+          description: {
+            value: identifiedPlace.description,
+            isValid: false,
+          },
         },
-        description: {
-          value: identifiedPlace.description,
-          isValid: false,
-        },
-      },
-      true
-    );
+        true
+      );
+    }
     setIsLoading(false);
   }, [identifiedPlace, setFormData]);
   const placeUpdateSubmitHandler = (e) => {
@@ -80,7 +82,7 @@ const UpdatePlace = () => {
 
   if (!identifiedPlace) {
     return (
-      <div className="center">
+      <div className="place-form center">
         <h2>Could not find any place!</h2>
       </div>
     );
