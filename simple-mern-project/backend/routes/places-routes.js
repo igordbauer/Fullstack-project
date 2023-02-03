@@ -32,4 +32,11 @@ router.get("/:pid", (req, res, next) => {
   const place = PLACES.filter((e) => e.id == placeId)[0];
   res.json({ place });
 });
+
+router.get("/user/:uid", (req, res, next) => {
+  const uid = req.params.uid;
+  const userPlaces = PLACES.find((e) => e.id === uid);
+  res.json({ userPlaces });
+});
+
 module.exports = router;
