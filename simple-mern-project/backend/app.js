@@ -10,6 +10,7 @@ const app = express();
 app.use(bodyParser.json());
 
 app.use("/api/places", placesRoutes);
+app.use("/api/users", userRoutes);
 
 app.use((req, res, next) => {
   const error = new HttpError("Page not found", 404);
