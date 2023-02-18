@@ -1,7 +1,7 @@
 const uuid = require("uuid");
 const HttpError = require("../models/http-error");
 const { validationResult } = require("express-validator");
-
+const User = require("../models/user");
 const USERS = [
   {
     id: "u1",
@@ -45,27 +45,44 @@ const getUsers = (req, res, next) => {
   res.json({ users: USERS });
 };
 
-const signUp = (req, res, next) => {
+const signUp = async (req, res, next) => {
   const error = validationResult(req);
-  console.log(error);
+
   if (!error.isEmpty()) {
-    throw new HttpError("Invalid inputs passed", 422);
+    const error = new HttpError("Invalid inputs passed", 422);
+    return next(error);
   }
-  const { name, email, password } = req.body;
+  const { name, email, password, places } = req.body;
 
-  const identifiedUser = USERS.find((e) => e.email === email);
+  let identifiedUser;
+
+  try {
+    identifiedUser = await User.findOne({ email });
+  } catch (e) {
+    const error = new HttpError("Signing up failed", 500);
+    return next(error);
+  }
   if (identifiedUser) {
-    throw new HttpError("This email already exists!", 422);
+    const error = new HttpError("This user already exists", 422);
+    return next(error);
   }
 
-  const createUser = {
-    id: uuid.v4(),
-    name: name,
-    email: email,
-    password: password,
-  };
-  USERS.push(createUser);
-  res.status(201).json({ user: createUser });
+  const createUser = new User({
+    name,
+    email,
+    image: "https://tinypng.com/images/social/website.jpg",
+    password,
+    places,
+  });
+
+  try {
+    await createUser.save();
+  } catch (e) {
+    const error = new HttpError("Signing up failed, please try again");
+    return next(error);
+  }
+
+  res.status(201).json({ user: createUser.toObject({ getters: true }) });
 };
 
 const login = (req, res, next) => {
