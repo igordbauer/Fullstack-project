@@ -2,6 +2,8 @@ const HttpError = require("../models/http-error");
 const uuid = require("uuid");
 const { validationResult } = require("express-validator");
 const getCoordsForAddress = require("../util/location");
+const Place = require("../models/place");
+
 let PLACES = [
   {
     id: "p1",
@@ -49,14 +51,25 @@ let PLACES = [
   },
 ];
 
-const getPlaceById = (req, res, next) => {
-  const placeId = req.params.pid;
-  const place = PLACES.find((e) => e.id == placeId);
+const getPlaceById = async (req, res, next) => {
+  const placeId = req.params.placeId;
+  console.log(placeId);
+  let place;
+  try {
+    place = await Place.findById(placeId);
+  } catch (e) {
+    const error = new HttpError("Could not get any place", 404);
+    return next(error);
+  }
   if (!place) {
-    throw new HttpError("Could not find a place for the provided id", 404);
+    const error = new HttpError(
+      "Could not find a place for the provided id",
+      404
+    );
+    return next(error);
   }
 
-  res.json({ place });
+  res.json({ place: place.toObject({ getters: true }) });
 };
 
 const getPlacesByUserId = (req, res, next) => {
@@ -81,15 +94,23 @@ const createPlace = async (req, res, next) => {
   } catch (error) {
     return next(error);
   }
-  const createdPlace = {
-    id: uuid.v4(),
+  const createdPlace = new Place({
     title,
     description,
-    location: coordinates,
     address,
+    location: coordinates,
+    image:
+      "https://i.pinimg.com/originals/bd/a5/be/bda5be61177acdb5fd46c3219f8b81a0.jpg",
     creator,
-  };
-  PLACES.push(createdPlace);
+  });
+
+  try {
+    await createdPlace.save();
+  } catch (err) {
+    const error = new HttpError("Create place failed!", 500);
+    return next(error);
+  }
+
   res.status(201).json({ place: createdPlace });
 };
 
