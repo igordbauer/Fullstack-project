@@ -2,44 +2,6 @@ const uuid = require("uuid");
 const HttpError = require("../models/http-error");
 const { validationResult } = require("express-validator");
 const User = require("../models/user");
-const USERS = [
-  {
-    id: "u1",
-    name: "Igor",
-    email: "igordbauer@gmail.com",
-    password: "1234",
-  },
-  {
-    id: "u2",
-    name: "Igor",
-    email: "igordbauer@gmail.com",
-    password: "1234",
-  },
-  {
-    id: "u3",
-    name: "Igor",
-    email: "igordbauer@gmail.com",
-    password: "1234",
-  },
-  {
-    id: "u4",
-    name: "Igor",
-    email: "igordbauer@gmail.com",
-    password: "1234",
-  },
-  {
-    id: "u5",
-    name: "Igor",
-    email: "igordbauer@gmail.com",
-    password: "1234",
-  },
-  {
-    id: "u6",
-    name: "Igor",
-    email: "igordbauer@gmail.com",
-    password: "1234",
-  },
-];
 
 const getUsers = async (req, res, next) => {
   let users;
@@ -59,7 +21,7 @@ const signUp = async (req, res, next) => {
     const error = new HttpError("Invalid inputs passed", 422);
     return next(error);
   }
-  const { name, email, password, places } = req.body;
+  const { name, email, password } = req.body;
 
   let identifiedUser;
 
@@ -79,7 +41,7 @@ const signUp = async (req, res, next) => {
     email,
     image: "https://tinypng.com/images/social/website.jpg",
     password,
-    places,
+    places: [],
   });
 
   try {

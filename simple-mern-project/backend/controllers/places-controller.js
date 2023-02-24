@@ -1,8 +1,10 @@
 const HttpError = require("../models/http-error");
 // const uuid = require("uuid");
+const mongoose = require("mongoose");
 const { validationResult } = require("express-validator");
 const getCoordsForAddress = require("../util/location");
 const Place = require("../models/place");
+const User = require("../models/user");
 
 const getPlaceById = async (req, res, next) => {
   const placeId = req.params.placeId;
@@ -26,10 +28,9 @@ const getPlaceById = async (req, res, next) => {
 
 const getPlacesByUserId = async (req, res, next) => {
   const uid = req.params.uid;
-
   let userPlaces;
   try {
-    userPlaces = await Place.find({ creator: uid });
+    userPlaces = await User.findById(uid).populate("places");
   } catch (e) {
     const error = new HttpError(
       "Something went wrong, could not find any place for this user",
@@ -44,7 +45,7 @@ const getPlacesByUserId = async (req, res, next) => {
     );
   }
   res.json({
-    userPlaces: userPlaces.map((e) => e.toObject({ getters: true })),
+    userPlaces: userPlaces,
   });
 };
 
@@ -68,9 +69,29 @@ const createPlace = async (req, res, next) => {
       "https://i.pinimg.com/originals/bd/a5/be/bda5be61177acdb5fd46c3219f8b81a0.jpg",
     creator,
   });
+  let user;
+  try {
+    user = await User.findById(creator);
+  } catch (e) {
+    const error = new HttpError("Creating place failed", 500);
+    return next(error);
+  }
+  if (!user) {
+    const error = new HttpError(
+      "We could not find any user for the provided id",
+      404
+    );
+    return next(error);
+  }
+  console.log(user);
 
   try {
-    await createdPlace.save();
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    await createdPlace.save({ session: session });
+    user.places.push(createdPlace);
+    await user.save({ session: session });
+    await session.commitTransaction();
   } catch (err) {
     const error = new HttpError("Create place failed!", 500);
     return next(error);
@@ -120,7 +141,7 @@ const deletePlace = async (req, res, next) => {
   const placeId = req.params.placeId;
   let place;
   try {
-    place = await Place.findById(placeId);
+    place = await Place.findById(placeId).populate("creator");
   } catch (e) {
     const error = new HttpError("Could not find the specified place", 404);
     return next(error);
@@ -128,10 +149,16 @@ const deletePlace = async (req, res, next) => {
   if (!place) {
     throw new HttpError("Could not find place for that id", 404);
   }
+
   try {
-    place.remove(placeId);
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    await place.remove({ session: session });
+    place.creator.places.pull(place);
+    await place.creator.save({ session: session });
+    await session.commitTransaction();
   } catch (e) {
-    const error = new HttpError("Could not delete the place", 404);
+    const error = new HttpError("Could not delete the place", 500);
     return next(error);
   }
 
