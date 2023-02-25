@@ -34,7 +34,7 @@ const Auth = () => {
     e.preventDefault();
     if (isLoginMode) {
       try {
-        await sendRequest(
+        const response = await sendRequest(
           "http://localhost:5000/api/users/login",
           "POST",
           JSON.stringify({
@@ -45,7 +45,7 @@ const Auth = () => {
             "Content-Type": "application/json",
           }
         );
-        authContext.login();
+        authContext.login(response.user.id);
       } catch (err) {}
     } else {
       try {
