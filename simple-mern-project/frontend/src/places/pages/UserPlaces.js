@@ -1,39 +1,33 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import PlaceList from "../components/PlaceList";
+import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
+import ErrorModal from "../../shared/components/UIElements/ErrorModal";
 import { useParams } from "react-router-dom";
+import { useHttpClient } from "../../shared/hooks/http-hook";
 
-const PLACES = [
-  {
-    id: "p1",
-    title: "Empire State Building",
-    description: "One of the most famous sky scrapers in the world!",
-    imageUrl:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Empire_State_Building_%28aerial_view%29.jpg/800px-Empire_State_Building_%28aerial_view%29.jpg",
-    address: "20 W 34th St., New York, NY 10001, EUA",
-    location: {
-      lat: 40.7484405,
-      lng: -73.9878584,
-    },
-    creator: "u1",
-  },
-  {
-    id: "p2",
-    title: "Empire State Building",
-    description: "One of the most famous sky scrapers in the world!",
-    imageUrl:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Empire_State_Building_%28aerial_view%29.jpg/800px-Empire_State_Building_%28aerial_view%29.jpg",
-    address: "20 W 34th St., New York, NY 10001, EUA",
-    location: {
-      lat: 40.7484405,
-      lng: -73.9878584,
-    },
-    creator: "u2",
-  },
-];
 const UserPlaces = () => {
   const { userId } = useParams();
-  const loadedPlaces = PLACES.filter((place) => place.creator === userId);
+  const [places, setPlaces] = useState([]);
+  const { sendRequest, error, isLoading, clearError } = useHttpClient();
 
-  return <PlaceList items={loadedPlaces} />;
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const response = await sendRequest(
+          `http://localhost:5000/api/places/user/${userId}`
+        );
+        setPlaces(response.userPlaces.places);
+      } catch (err) {}
+    };
+    load();
+  }, [sendRequest, userId]);
+
+  return (
+    <>
+      <ErrorModal error={error} onClear={clearError} />
+      {isLoading && <LoadingSpinner asOverlay />}
+      {!isLoading && <PlaceList items={places} />}
+    </>
+  );
 };
 export default UserPlaces;

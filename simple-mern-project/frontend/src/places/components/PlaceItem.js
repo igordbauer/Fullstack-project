@@ -51,7 +51,7 @@ const PlaceItem = ({ id, title, description, address, image, coordinates }) => {
         }
       >
         <p>
-          Do you want to porceed and delete this place? Please note that it
+          Do you want to proceed and delete this place? Please note that it
           can't be undone thereafter.
         </p>
       </Modal>
