@@ -44,7 +44,7 @@ const getPlacesByUserId = async (req, res, next) => {
     );
   }
   res.json({
-    userPlaces: userPlaces,
+    userPlaces: userPlaces.toObject({ getters: true }),
   });
 };
 
