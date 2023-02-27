@@ -39,7 +39,7 @@ const signUp = async (req, res, next) => {
   const createUser = new User({
     name,
     email,
-    image: "https://tinypng.com/images/social/website.jpg",
+    image: req.file.path,
     password,
     places: [],
   });
