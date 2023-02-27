@@ -5,23 +5,39 @@ import Button from "../../shared/components/FormComponents/Button";
 import Modal from "../../shared/components/UIElements/Modal";
 import Map from "../../shared/components/UIElements/Map";
 import { AuthContext } from "../../shared/context/authContext";
+import { useHttpClient } from "../../shared/hooks/http-hook";
+import ErrorModal from "../../shared/components/UIElements/ErrorModal";
+import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
 
-const PlaceItem = ({ id, title, description, address, image, coordinates }) => {
+const PlaceItem = ({
+  id,
+  title,
+  description,
+  address,
+  image,
+  creatorId,
+  coordinates,
+  onDelete,
+}) => {
   const authContext = useContext(AuthContext);
+  const { error, isLoading, clearError, sendRequest } = useHttpClient();
 
   const [showMap, setShowMap] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-
   const openMapHandler = () => setShowMap(true);
   const closeMapHandler = () => setShowMap(false);
   const showDeleteWarningHandler = () => setShowConfirmModal(true);
   const cancelDeleteHandler = () => setShowConfirmModal(false);
-  const confirmDeleteHandler = () => {
+  const confirmDeleteHandler = async () => {
     setShowConfirmModal(false);
-    console.log("Deleting...");
+    try {
+      await sendRequest(`http://localhost:5000/api/places/${id}`, "DELETE");
+      onDelete(id);
+    } catch (err) {}
   };
   return (
     <>
+      <ErrorModal error={error} onClear={clearError} />
       <Modal
         show={showMap}
         onCancel={closeMapHandler}
@@ -57,27 +73,32 @@ const PlaceItem = ({ id, title, description, address, image, coordinates }) => {
       </Modal>
       <li className="place-item">
         <Card className="place-item__content">
-          <div className="place-item__image">
-            <img src={image} alt={title} />
-          </div>
-          <div className="place-item__info">
-            <h2>{title}</h2>
-            <h3>{address}</h3>
-            <p>{description}</p>
-          </div>
-          <div className="place-item__actions">
-            <Button inverse onClick={openMapHandler}>
-              See Map
-            </Button>
-            {authContext.isLoggedIn && (
-              <>
-                <Button to={`/places/${id}`}>Edit</Button>
-                <Button danger onClick={showDeleteWarningHandler}>
-                  Delete
+          {isLoading && <LoadingSpinner asOverlay />}
+          {!isLoading && (
+            <>
+              <div className="place-item__image">
+                <img src={image} alt={title} />
+              </div>
+              <div className="place-item__info">
+                <h2>{title}</h2>
+                <h3>{address}</h3>
+                <p>{description}</p>
+              </div>
+              <div className="place-item__actions">
+                <Button inverse onClick={openMapHandler}>
+                  See Map
                 </Button>
-              </>
-            )}
-          </div>
+                {authContext.userId === creatorId && (
+                  <>
+                    <Button to={`/places/${id}`}>Edit</Button>
+                    <Button danger onClick={showDeleteWarningHandler}>
+                      Delete
+                    </Button>
+                  </>
+                )}
+              </div>
+            </>
+          )}
         </Card>
       </li>
     </>

@@ -21,12 +21,16 @@ const UserPlaces = () => {
     };
     load();
   }, [sendRequest, userId]);
-
+  const placeDeleteHandler = (deletedPlaceId) => {
+    setPlaces((prev) => {
+      return prev.filter((e) => e.id !== deletedPlaceId);
+    });
+  };
   return (
     <>
       <ErrorModal error={error} onClear={clearError} />
       {isLoading && <LoadingSpinner asOverlay />}
-      {!isLoading && <PlaceList items={places} />}
+      {!isLoading && <PlaceList items={places} onDelete={placeDeleteHandler} />}
     </>
   );
 };

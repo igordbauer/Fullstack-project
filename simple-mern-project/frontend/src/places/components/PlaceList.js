@@ -2,15 +2,13 @@ import React from "react";
 import Card from "../../shared/components/UIElements/Card";
 import PlaceItem from "./PlaceItem";
 import "./PlaceList.css";
-import Button from "../../shared/components/FormComponents/Button";
 
-const PlaceList = ({ items }) => {
+const PlaceList = ({ items, onDelete }) => {
   if (items.length === 0) {
     return (
       <div className="place-list center">
         <Card className="place-list">
-          <h2>No Places found. Maybe create one?</h2>
-          <Button to="/places/new">Share Place</Button>
+          <h2>No Places found.</h2>
         </Card>
       </div>
     );
@@ -26,8 +24,9 @@ const PlaceList = ({ items }) => {
           title={place.title}
           description={place.description}
           address={place.address}
-          creatorId={place.creatorId}
+          creatorId={place.creator}
           coordinates={place.location}
+          onDelete={onDelete}
         />
       ))}
     </ul>
