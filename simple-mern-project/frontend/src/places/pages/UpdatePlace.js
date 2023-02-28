@@ -15,7 +15,7 @@ import ErrorModal from "../../shared/components/UIElements/ErrorModal";
 
 const UpdatePlace = () => {
   const placeId = useParams().placeId;
-  const { userId } = useContext(AuthContext);
+  const { userId, token } = useContext(AuthContext);
   const history = useHistory();
   const { error, sendRequest, isLoading, clearError } = useHttpClient();
   const [place, setPlace] = useState();
@@ -69,7 +69,7 @@ const UpdatePlace = () => {
           title: formState.inputs.title.value,
           description: formState.inputs.description.value,
         }),
-        { "Content-Type": "application/json" }
+        { "Content-Type": "application/json", Authorization: "Bearer " + token }
       );
       history.push(`/${userId}/places`);
     } catch (err) {}

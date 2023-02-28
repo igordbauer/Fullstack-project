@@ -35,7 +35,7 @@ const Auth = () => {
     e.preventDefault();
     if (isLoginMode) {
       try {
-        const response = await sendRequest(
+        const responseData = await sendRequest(
           "http://localhost:5000/api/users/login",
           "POST",
           JSON.stringify({
@@ -46,7 +46,7 @@ const Auth = () => {
             "Content-Type": "application/json",
           }
         );
-        authContext.login(response.user.id);
+        authContext.login(responseData.userId, responseData.token);
       } catch (err) {}
     } else {
       try {
@@ -56,12 +56,13 @@ const Auth = () => {
         formData.append("password", formState.inputs.password.value);
         formData.append("image", formState.inputs.image.value);
 
-        await sendRequest(
+        const responseData = await sendRequest(
           "http://localhost:5000/api/users/signup",
           "POST",
           formData
         );
-        authContext.login();
+        console.log(responseData);
+        authContext.login(responseData.userId, responseData.token);
       } catch (err) {}
     }
   };
