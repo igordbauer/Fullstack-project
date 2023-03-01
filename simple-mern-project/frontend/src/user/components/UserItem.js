@@ -13,7 +13,7 @@ const UserItem = ({ id, image, name, placeCount }) => {
             <Avatar
               width="64px"
               heigth="64px"
-              image={`http://localhost:5000/${image}`}
+              image={process.env.REACT_APP_ASSET_URL + `/${image}`}
               alt={name}
             />
           </div>

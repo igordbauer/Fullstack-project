@@ -51,7 +51,9 @@ app.use((error, req, res, next) => {
 
 // app.use("/api/user", userRoutes);
 mongoose
-  .connect(`${process.env.MONGODB_CREDENTIALS}`)
+  .connect(
+    `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.mkk7l8p.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`
+  )
   .then(() => {
     app.listen(5000);
   })
